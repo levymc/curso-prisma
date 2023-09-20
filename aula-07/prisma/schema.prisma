@@ -1,0 +1,58 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  email     String   @unique
+  password  String
+  profileId Int      @unique
+  profile Profile?
+  @@map("user")
+}
+
+model Profile {
+  id            Int             @id @default(autoincrement())
+  firstName     String
+  lastName      String
+  userId        Int             @unique
+  user          User            @relation(fields: [userId], references: [id])
+  address       Address[]
+  profileservice ProfileService[] @relation("profile_services")
+
+  @@map("profile")
+}
+
+model Address {
+  id      Int     @id @default(autoincrement())
+  street  String
+  number  Int
+  zipcode Int     @unique
+  profileId Int @unique
+  profile Profile @relation(fields: [profileId], references: [id])
+
+  @@map("address")
+}
+
+model ProfileService {
+  id           Int      @id @default(autoincrement())
+  servicecode  Int      @unique
+  service      Service  @relation(fields: [servicecode], references: [id])
+  profile_id   Int
+  profile      Profile[] @relation("profile_services")
+
+  @@map("profileService")
+}
+
+
+model Service {
+  id           Int      @id @default(autoincrement())
+  description String
+  profileservice ProfileService?
+}
